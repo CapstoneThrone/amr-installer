@@ -1,0 +1,31 @@
+[connection] 
+id=uwstout-wifi
+uuid={{ 99999999 | random | to_uuid }}
+type=wifi
+interface-name=wlan0
+permissions=
+ 
+[wifi]
+mac-address-blacklist=
+mode=infrastructure
+ssid=StoutSecure
+ 
+[wifi-security]
+key-mgmt=wpa-eap
+ 
+[802-1x] 
+eap=peap;
+identity={{ stout_user }}
+password={{ stout_pass }}
+phase2-auth=mschapv2
+ 
+[ipv4] 
+dns-search=
+method=auto
+ 
+[ipv6] 
+addr-gen-mode=stable-privacy
+dns-search=
+ip6-privacy=0
+method=auto
+
