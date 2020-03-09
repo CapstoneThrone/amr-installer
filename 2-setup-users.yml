@@ -1,0 +1,31 @@
+- hosts: unprepared
+  become: yes
+  vars_files:
+    - ros-secrets.yml
+  tasks:
+    - name: Create ros user
+      user:
+        name: ros
+        password: "{{ ros_pass | password_hash('sha512') }}"
+        groups: plugdev,dialout,netdev,video,audio
+        shell: /bin/bash
+        append: yes
+    - name: Create ros-adm user
+      user:
+        name: ros-adm
+        password: "{{ ros_adm_pass | password_hash('sha512') }}"
+        groups: adm,dialout,cdrom,floppy,sudo,audio,dip,video,plugdev,lxd,netdev,ros
+        shell: /bin/bash
+        append: yes
+    - name: Add authorized_key for ros-adm
+      authorized_key:
+        user: ros-adm
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
+    - name: Add ros bash env source to ros user
+      lineinfile:
+        path: /home/ros/.bashrc
+        state: present
+        owner: ros
+        group: ros
+        line: "source /opt/ros/melodic/setup.bash"

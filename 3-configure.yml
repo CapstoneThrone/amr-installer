@@ -1,0 +1,65 @@
+- hosts: unprepared
+  become: yes
+  vars_files:
+    - ros-secrets.yml
+  tasks:
+    - name: Add ROS Project's apt key
+      apt_key:
+        keyserver: keyserver.ubuntu.com
+        id: C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+    - name: Add Jack's apt key
+      apt_key:
+        keyserver: keyserver.ubuntu.com
+        id: 3BC61284BD2281D34C2EDE8614259C593F1720C2
+    - name: Install ROS source
+      template:
+        src: "templates/ros-latest.list.j2"
+        dest: "/etc/apt/sources.list.d/ros-latest.list"
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Install Jack's source
+      template:
+        src: "templates/jacks-repo.list.j2"
+        dest: "/etc/apt/sources.list.d/jacks-repo.list"
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Install ip-pusher
+      apt:
+        update_cache: yes
+        name: "ip-pusher"
+        state: present
+    - name: Install ip-pusher config
+      template:
+          src: "templates/ip-pusher.json.j2"
+          dest: "/etc/ip-pusher.json"
+          owner: root
+          group: root
+          mode: '0644'
+    - name: Enable ip-pusher
+      systemd:
+          name: "ip-pusher"
+          enabled: yes
+          daemon_reload: yes
+    - name: Remove extra MOTD fluff (news)
+      file:
+          path: "/etc/update-motd.d/50-motd-news"
+          state: absent
+    - name: Remove extra MOTD fluff (EOL)
+      file:
+          path: "/etc/update-motd.d/95-hwe-eol"
+          state: absent
+    - name: Remove extra MOTD fluff (help)
+      file:
+          path: "/etc/update-motd.d/10-help-text"
+          state: absent
+    - name: Configure sshd
+      copy:
+        src: "files/sshd_config"
+        dest: "/etc/ssh/sshd_config"
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Restart
+      reboot:

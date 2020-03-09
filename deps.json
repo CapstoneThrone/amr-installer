@@ -1,0 +1,20 @@
+{
+	"apt": [
+		"build-essential",
+		"procinfo",
+		"python-wstool",
+		"python-rosinstall",
+		"python-rosinstall-generator",
+		"ros-melodic-desktop-full",
+		"ros-melodic-rosserial",
+		"ros-melodic-rosserial-arduino",
+		"ros-melodic-hector-slam",
+		"ros-melodic-rplidar-ros",
+		"ros-melodic-gmapping"
+	],
+	"git": [
+		"Top-Level-Control",
+		"amr-mapping",
+		"amr-lcd-control"
+	]
+}

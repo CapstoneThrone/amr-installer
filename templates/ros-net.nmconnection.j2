@@ -1,6 +1,6 @@
 [connection] 
-id=uwstout-wifi
-uuid={{ 99999999 | random | to_uuid }}
+id=ros-net
+uuid=52816e6c-4c49-484f-827f-85b37b1a2315
 type=wifi
 interface-name=wlan0
 permissions=
@@ -8,16 +8,11 @@ permissions=
 [wifi]
 mac-address-blacklist=
 mode=infrastructure
-ssid=StoutSecure
+ssid=ros-net
  
 [wifi-security]
-key-mgmt=wpa-eap
- 
-[802-1x] 
-eap=peap;
-identity={{ stout_user }}
-password={{ stout_pass }}
-phase2-auth=mschapv2
+key-mgmt=wpa-psk
+psk={{ ros_net_psk }}
  
 [ipv4] 
 dns-search=

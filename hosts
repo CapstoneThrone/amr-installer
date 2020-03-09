@@ -1,0 +1,4 @@
+[unprepared]
+169.254.100.106	ansible_user=ubuntu ansible_connection=paramiko
+[amr]
+169.254.6.128

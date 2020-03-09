@@ -1,0 +1,7 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: Refresh and update
+      apt:
+        upgrade: full
+        update_cache: yes

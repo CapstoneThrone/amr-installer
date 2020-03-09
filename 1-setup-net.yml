@@ -1,0 +1,81 @@
+- hosts: unprepared
+  become: yes
+  vars_files:
+    - ros-secrets.yml
+  tasks:
+    - name: Install network manager
+      apt:
+        name: network-manager
+        state: present
+    - name: Enable network manager for next boot
+      service:
+        name: NetworkManager
+        enabled: yes
+    - name: Disable cloud init
+      copy:
+        src: "files/99-disable-network-config.cfg"
+        dest: "/etc/cloud/cloud.cfg.d/99-disable-network-config.cfg"
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Install netplan config to disable netplan and allow NetworkManager to control interfaces
+      copy:
+        src: "files/00-ros-netplan.yaml"
+        dest: "/etc/netplan/00-ros-netplan.yaml"
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Remove 50-clout-init.yaml from base ubuntu install
+      file:
+        path: "/etc/netplan/50-cloud-init.yaml"
+        state: absent
+    - name: Setup firewall to block incoming wlan0 traffic on all ports (ufw)
+      ufw:
+        rule: deny
+        direction: in
+        interface: wlan0
+    - name: Setup firewall to allow incoming eth0 traffic on all ports (ufw)
+      ufw:
+        rule: allow
+        direction: in
+        interface: eth0
+    - name: Enable firewall (ufw)
+      ufw:
+        state: enabled
+    - name: Install connections (ros-net)
+      template:
+        src: "templates/ros-net.nmconnection.j2"
+        dest: "/etc/NetworkManager/system-connections/ros-net"
+        owner: root
+        group: root
+        mode: '0600'
+    - name: Install connections (StoutSecure)
+      template:
+        src: "templates/uwstout-wifi.nmconnection.j2"
+        dest: "/etc/NetworkManager/system-connections/uwstout-wifi"
+        owner: root
+        group: root
+        mode: '0600'
+    - name: Install connections (wired with static ip [10.13.42.0])
+      copy:
+        src: "files/wired-ros-config-net.nmconnection"
+        dest: "/etc/NetworkManager/system-connections/wired-ros-config-net"
+        owner: root
+        group: root
+        mode: '0600'
+    - name: Update hostname
+      template:
+        src: "templates/hostname.j2"
+        dest: "/etc/hostname"
+        owner: root
+        group: root
+        mode: '0644'
+    # This step is here since we already have the hostname var, then we don't need to get it again.
+    # The rest of the MOTD management stuff is in 3-configure
+    - name: Install MOTD
+      copy:
+        src: "files/{{ hostname }}-motd.sh"
+        dest: "/etc/update-motd.d/20-motd-art"
+        owner: root
+        group: root
+        mode: '0755'

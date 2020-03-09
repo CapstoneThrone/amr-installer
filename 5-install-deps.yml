@@ -1,0 +1,35 @@
+- hosts: amr
+  become: yes
+  vars_files:
+      - ros-secrets.yml
+  vars:
+    deps: "{{ lookup('file', 'deps.json') | from_json }}"
+    ansible_user: ros-adm
+    ansible_pass: "{{ ros_adm_pass }}"
+    ansible_sudo_pass: "{{ ros_adm_pass }}"
+  tasks:
+    - name: Create catkin_ws if it doesn't yet exist
+      file:
+        path: /home/ros/catkin_ws/src
+        state: directory
+        owner: ros
+        group: ros
+        mode: '0755'
+    - name: Install packages from deps.json
+      apt:
+        pkg: "{{ deps.apt }}"
+    - name: Install git repos from deps.json
+      git:
+        repo: "https://github.com/CapstoneThrone/{{ item }}.git"
+        dest: "/home/ros/catkin_ws/src/{{ item }}/"
+        version: master
+      loop: "{{ deps.git }}"
+      become: true
+      become_user: ros
+    - name: Build git repos
+      command: catkin_make
+      become: yes
+      become_user: ros
+      args:
+        chdir: /home/ros/catkin_ws
+
