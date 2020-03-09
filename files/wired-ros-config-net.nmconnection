@@ -9,7 +9,7 @@ permissions=
 mac-address-blacklist=
 
 [ipv4]
-address1=10.13.42.0/8
+address1=169.254.13.13
 dns-search=
 method=manual
 never-default=true

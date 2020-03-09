@@ -1,4 +1,0 @@
-ansible-playbook -i hosts -k 0-update-system.yml
-ansible-playbook -i hosts -k --ask-vault-pass -e hostname=franxx 1-setup-net.yml
-ansible-playbook -i hosts -k --ask-vault-pass 3-configure.yml
-ansible-playbook -i hosts --ask-vault-pass 4-cleanup-default-user.yml
