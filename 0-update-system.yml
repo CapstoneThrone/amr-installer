@@ -1,6 +1,14 @@
-- hosts: all
+- hosts: 127.0.0.1
+  connection: local
   become: yes
+  vars_files:
+    - ros-secrets.yml
+  vars:
+    ansible_user: ubuntu
+    ansible_pass: "{{ ros_adm_pass }}"
+    ansible_sudo_pass: "{{ ros_adm_pass }}"
   tasks:
+    # This task is about equivalent to "sudo apt update && sudo apt upgrade"
     - name: Refresh and update
       apt:
         upgrade: full

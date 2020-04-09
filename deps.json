@@ -10,11 +10,13 @@
 		"ros-melodic-rosserial-arduino",
 		"ros-melodic-hector-slam",
 		"ros-melodic-rplidar-ros",
-		"ros-melodic-gmapping"
+		"ros-melodic-gmapping",
+		"ros-melodic-joy",
+		"ros-melodic-teleop-twist-joy"
 	],
 	"git": [
 		"Top-Level-Control",
 		"amr-mapping",
-		"amr-lcd-control"
+		"amr-lcd-control",
 	]
 }

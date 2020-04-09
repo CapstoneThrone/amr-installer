@@ -1,12 +1,16 @@
-- hosts: amr
+- hosts: 127.0.0.1
+  connection: local
   become: yes
   vars_files:
     - ros-secrets.yml
+  # We're now using ros-adm for our login
   vars:
     ansible_user: ros-adm
     ansible_pass: "{{ ros_adm_pass }}"
     ansible_sudo_pass: "{{ ros_adm_pass }}"
   tasks:
+    # Remove the defualt user. We no longer need it.
+    # This task is equivalent to "sudo userdel -r ubuntu"
     - name: Remove ubuntu default user
       user:
         name: ubuntu

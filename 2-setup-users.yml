@@ -1,8 +1,15 @@
-- hosts: unprepared
+- hosts: 127.0.0.1
+  connection: local
   become: yes
   vars_files:
     - ros-secrets.yml
+  vars:
+    ansible_user: ubuntu
+    ansible_pass: "{{ ros_adm_pass }}"
+    ansible_sudo_pass: "{{ ros_adm_pass }}"
   tasks:
+    # Add a new user "ros"
+    # This task is equivalent to "sudo useradd ros -mG dip,plugdev,dialout,netdev,video,audio -s /bin/bash -p '<ros_pass>'"
     - name: Create ros user
       user:
         name: ros
@@ -10,6 +17,9 @@
         groups: plugdev,dialout,netdev,video,audio
         shell: /bin/bash
         append: yes
+
+    # Add a new user "ros-adm"
+    # This task is equivalent to "sudo useradd ros -mG adm,dialout,cdrom,floppy,sudo,audio,dip,video,plugdev,lxd,netdev,ros -s /bin/bash -p '<ros_adm_pass>'"
     - name: Create ros-adm user
       user:
         name: ros-adm
@@ -17,11 +27,9 @@
         groups: adm,dialout,cdrom,floppy,sudo,audio,dip,video,plugdev,lxd,netdev,ros
         shell: /bin/bash
         append: yes
-    - name: Add authorized_key for ros-adm
-      authorized_key:
-        user: ros-adm
-        state: present
-        key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
+
+    # Adds a source to the ros user's .bashrc
+    # equivalent to "echo 'source /opt/ros/melodic/setup.bash' >> /home/ros/.bashrc" if logged in as ros user
     - name: Add ros bash env source to ros user
       lineinfile:
         path: /home/ros/.bashrc
