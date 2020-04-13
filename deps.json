@@ -17,6 +17,6 @@
 	"git": [
 		"Top-Level-Control",
 		"amr-mapping",
-		"amr-lcd-control",
+		"amr-lcd-control"
 	]
 }
