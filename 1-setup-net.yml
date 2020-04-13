@@ -141,8 +141,14 @@
         group: root
         mode: '0644'
 
+    # Check for optional <hostname>-motd.sh
+    - name: Check for motd name
+      local_action: stat path="{{ playbook_dir }}/files/{{ hostname }}-motd.sh"
+      register: hostname-motd
+
     # This adds a script to decorate the motd on login
     # This step is here since we already have the hostname var, then we don't need to get it again.
+    # It runs when the file exists due to the above task.
     # The rest of the MOTD management stuff is in 3-configure
     # This task is equivalent to:
     #
@@ -156,3 +162,4 @@
         owner: root
         group: root
         mode: '0755'
+      when: hostname-motd.stat.exists == true
