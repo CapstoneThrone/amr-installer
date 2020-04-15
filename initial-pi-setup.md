@@ -16,7 +16,7 @@ e) A monitor that accepts hdmi
 
 f) A standard usb plug-in keyboard 
 
-g) Access to a wifi network (Stout’s wifi network does NOT work for this at the time of writing, so someone’s home network is probably your best bet, or any NON WPA-Enterprise network). 
+g) Access to an ethernet cable on someone’s network (Stout’s wifi network does NOT work for this at the time of writing, so someone’s home network is probably your best bet, or any NON WPA-Enterprise network). 
 
 h) A laptop or internet-enabled computer with a usb port (for the micro sd card reader). 
 
