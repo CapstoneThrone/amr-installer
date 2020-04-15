@@ -55,13 +55,13 @@ Change the default password to the `ros-adm` password from the user guide.
 
 Plug an ethernet cord into the raspberry pi, and the other end into a functional switch or router. To confirm the connection is functioning properly, run the command: 
 
-_ping google.com_
+ping google.com
 
-Output should look like this (press ctrl-c to stop the ping command after a few iterations): 
+Output should look like this (press ctrl-c to stop the ping command after a few iterations):
 
-PING google.com (172.217.6.110) 56(84) bytes of data. 
+PING google.com (172.217.6.110) 56(84) bytes of data.
 
-64 bytes from ord37s03-in-f14.1e100.net (172.217.6.110): icmp_seq=1 ttl=52 time=26.3 ms 
+64 bytes from ord37s03-in-f14.1e100.net (172.217.6.110): icmp_seq=1 ttl=52 time=26.3 ms
 
 64 bytes from ord37s03-in-f14.1e100.net (172.217.6.110): icmp_seq=2 ttl=52 time=26.7 ms 
 
