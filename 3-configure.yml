@@ -1,16 +1,29 @@
-- hosts: unprepared
+- hosts: 127.0.0.1
+  connection: local
   become: yes
   vars_files:
     - ros-secrets.yml
+  vars:
+    ansible_user: ubuntu
+    ansible_pass: "{{ ros_adm_pass }}"
+    ansible_sudo_pass: "{{ ros_adm_pass }}"
   tasks:
+    # Add a gpg key to apt's keyring to verify the signed ROS packages
+    # This task is equivalent to "sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654"
     - name: Add ROS Project's apt key
       apt_key:
         keyserver: keyserver.ubuntu.com
         id: C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
-    - name: Add Jack's apt key
-      apt_key:
-        keyserver: keyserver.ubuntu.com
-        id: 3BC61284BD2281D34C2EDE8614259C593F1720C2
+
+    # Copy over a ros apt source file for ros apt repo
+    # This task is loosly equivalent to:
+    #
+    #  sudo cp ./templates/ros-latest.list.j2 /etc/apt/sources.list.d/ros-latest.list
+    #  sudo chown root:root /etc/apt/sources.list.d/ros-latest.list
+    #  sudo chmod 0644 /etc/apt/sources.list.d/ros-latest.list
+    #
+    # "templates/ros-latest.list.j2" is a template file.
+    # things like {{ var }} are replaced with their value at runtime.
     - name: Install ROS source
       template:
         src: "templates/ros-latest.list.j2"
@@ -18,42 +31,34 @@
         owner: root
         group: root
         mode: '0644'
-    - name: Install Jack's source
-      template:
-        src: "templates/jacks-repo.list.j2"
-        dest: "/etc/apt/sources.list.d/jacks-repo.list"
-        owner: root
-        group: root
-        mode: '0644'
-    - name: Install ip-pusher
-      apt:
-        update_cache: yes
-        name: "ip-pusher"
-        state: present
-    - name: Install ip-pusher config
-      template:
-          src: "templates/ip-pusher.json.j2"
-          dest: "/etc/ip-pusher.json"
-          owner: root
-          group: root
-          mode: '0644'
-    - name: Enable ip-pusher
-      systemd:
-          name: "ip-pusher"
-          enabled: yes
-          daemon_reload: yes
+
+    # Remove one of the scripts for the MOTD that advertises Canonical garbage
+    # This task is equivalent to "sudo rm -f /etc/update-motd.d/50-motd-news"
     - name: Remove extra MOTD fluff (news)
       file:
           path: "/etc/update-motd.d/50-motd-news"
           state: absent
+
+    # Remove one of the scripts that reminds you when the release of ubuntu is eol with no updates
+    # This task is equivalent to "sudo rm -f /etc/update-motd.d/95-hwe-eol"
     - name: Remove extra MOTD fluff (EOL)
       file:
           path: "/etc/update-motd.d/95-hwe-eol"
           state: absent
+
+    # Remove one of the scripts that lists help text. We probably don't need that
+    # This task is equivalent to "sudo rm -f /etc/update-motd.d/10-help-text"
     - name: Remove extra MOTD fluff (help)
       file:
           path: "/etc/update-motd.d/10-help-text"
           state: absent
+
+    # Copy over a config for sshd. See the actual config for what it does or user docs
+    # This task is equivalent to
+    #
+    #  sudo cp ./files/sshd_config /etc/ssh/sshd_config
+    #  sudo chown root:root /etc/ssh/sshd_config
+    #  sudo chmod 0644 /etc/ssh/sshd_config
     - name: Configure sshd
       copy:
         src: "files/sshd_config"
@@ -61,5 +66,3 @@
         owner: root
         group: root
         mode: '0644'
-    - name: Restart
-      reboot:

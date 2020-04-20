@@ -1,16 +1,35 @@
-- hosts: unprepared
+- hosts: 127.0.0.1
+  connection: local
   become: yes
   vars_files:
     - ros-secrets.yml
+  vars:
+    ansible_user: ubuntu
+    ansible_pass: "{{ ros_adm_pass }}"
+    ansible_sudo_pass: "{{ ros_adm_pass }}"
   tasks:
+    # Install NetworkManager with apt
+    # This task is equivalent to "apt install network-manager"
     - name: Install network manager
       apt:
         name: network-manager
         state: present
+
+    # Enable NetworkManager
+    # This task is equivalent to "systemctl enable network-manager"
     - name: Enable network manager for next boot
       service:
         name: NetworkManager
         enabled: yes
+
+    # cloud-init is Canonical's tool for initializing VMs in the cloud
+    # We might have been able to hook into this somehow, but it probably isn't worth the effort
+    # This task disables cloud-init
+    # This task is equivalent to:
+    #
+    #  sudo cp ./files/99-disable-network-config.cfg /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
+    #  sudo chown root:root /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
+    #  sudo chmod 0644 /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
     - name: Disable cloud init
       copy:
         src: "files/99-disable-network-config.cfg"
@@ -18,6 +37,14 @@
         owner: root
         group: root
         mode: '0644'
+
+    # Install netplan config. Netplan is Canonical's tool for initializing network configurations
+    # We're using NetworkManager, so we disable it with this config
+    # This task is equivalent to:
+    #
+    #  sudo cp ./files/00-ros-netplan.yaml /etc/netplan/00-ros-netplan.yaml
+    #  sudo chown root:root /etc/netplan/00-ros-netplan.yaml
+    #  sudo chmod 0644 /etc/netplan/00-ros-netplan.yaml
     - name: Install netplan config to disable netplan and allow NetworkManager to control interfaces
       copy:
         src: "files/00-ros-netplan.yaml"
@@ -25,23 +52,46 @@
         owner: root
         group: root
         mode: '0644'
+
+    # On first boot, cloud-init created a netplan. Remove it
+    # This task is equivalent to "sudo rm -f /etc/netplan/50-cloud-init.yaml"
     - name: Remove 50-clout-init.yaml from base ubuntu install
       file:
         path: "/etc/netplan/50-cloud-init.yaml"
         state: absent
+
+    # We're using ufw, since it pre-installed, and is easy to use.
+    # Block all traffic on the wireless interface from coming in
+    # This task is equivalent to "sudo ufw deny in on wlan0"
     - name: Setup firewall to block incoming wlan0 traffic on all ports (ufw)
       ufw:
         rule: deny
         direction: in
         interface: wlan0
+
+    # Allow all traffic on the ethernet interface in
+    # This task is equivalent to "sudo ufw allow in on eth0"
     - name: Setup firewall to allow incoming eth0 traffic on all ports (ufw)
       ufw:
         rule: allow
         direction: in
         interface: eth0
+
+    # Turn on firewall and enable service
+    # This task is equivalent to "sudo ufw enable"
     - name: Enable firewall (ufw)
       ufw:
         state: enabled
+
+    # Copy over a NetworkManager config for connecting to out "ros-net" with wlan0.
+    # This task is loosly equivalent to:
+    #
+    #  sudo cp ./templates/ros-net.nmconnection.j2 /etc/NetworkManager/system-connections/ros-net
+    #  sudo chown root:root /etc/NetworkManager/system-connections/ros-net
+    #  sudo chmod 0600 /etc/NetworkManager/system-connections/ros-net
+    #
+    # "templates/ros-net.nmconnection.j2" is a template file.
+    # things like {{ var }} are replaced with their value at runtime.
     - name: Install connections (ros-net)
       template:
         src: "templates/ros-net.nmconnection.j2"
@@ -49,6 +99,16 @@
         owner: root
         group: root
         mode: '0600'
+
+    # Copy over a NetworkManager config for connecting to "StoutSecure" with wlan0.
+    # This task is loosly equivalent to:
+    #
+    #  sudo cp ./templates/uwstout-wifi.nmconnection.j2 /etc/NetworkManager/system-connections/uwstout-wifi
+    #  sudo chown root:root /etc/NetworkManager/system-connections/uwstout-wifi
+    #  sudo chmod 0600 /etc/NetworkManager/system-connections/uwstout-wifi
+    #
+    # "templates/uwstout-wifi.nmconnection.j2" is a template file.
+    # things like {{ var }} are replaced with their value at runtime.
     - name: Install connections (StoutSecure)
       template:
         src: "templates/uwstout-wifi.nmconnection.j2"
@@ -56,6 +116,13 @@
         owner: root
         group: root
         mode: '0600'
+
+    # Copy over a NetworkManager config for connecting over the ethernet interface.
+    # This task is equivalent to:
+    #
+    #  sudo cp ./files/wired-ros-config-net.nmconnection /etc/NetworkManager/system-connections/wired-ros-config-net
+    #  sudo chown root:root /etc/NetworkManager/system-connections/wired-ros-config-net
+    #  sudo chmod 0600 /etc/NetworkManager/system-connections/wired-ros-config-net
     - name: Install connections (wired with static ip [10.13.42.0])
       copy:
         src: "files/wired-ros-config-net.nmconnection"
@@ -63,6 +130,9 @@
         owner: root
         group: root
         mode: '0600'
+
+    # Change the hostname to what has been passed in.
+    # this is loosly equivalent to running "sudo echo '<hostname>' > /etc/hostname"
     - name: Update hostname
       template:
         src: "templates/hostname.j2"
@@ -70,8 +140,21 @@
         owner: root
         group: root
         mode: '0644'
+
+    # Check for optional <hostname>-motd.sh
+    - name: Check for motd name
+      local_action: stat path="{{ playbook_dir }}/files/{{ hostname }}-motd.sh"
+      register: hostname-motd
+
+    # This adds a script to decorate the motd on login
     # This step is here since we already have the hostname var, then we don't need to get it again.
+    # It runs when the file exists due to the above task.
     # The rest of the MOTD management stuff is in 3-configure
+    # This task is equivalent to:
+    #
+    #  sudo cp ./files/<hostname>-motd.sh /etc/update-motd.d/20-motd-art
+    #  sudo chown root:root /etc/update-motd.d/20-motd-art
+    #  sudo chmod 0755 /etc/update-motd.d/20-motd-art
     - name: Install MOTD
       copy:
         src: "files/{{ hostname }}-motd.sh"
@@ -79,3 +162,4 @@
         owner: root
         group: root
         mode: '0755'
+      when: hostname-motd.stat.exists == true

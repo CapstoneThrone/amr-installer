@@ -1,13 +1,18 @@
-- hosts: amr
+- hosts: 127.0.0.1
+  connection: local
   become: yes
   vars_files:
-      - ros-secrets.yml
+    - ros-secrets.yml
+    # We're now using ros-adm for our login
+    # This also loads the file ./deps.json for git repos to check out and packages to install
   vars:
     deps: "{{ lookup('file', 'deps.json') | from_json }}"
     ansible_user: ros-adm
     ansible_pass: "{{ ros_adm_pass }}"
     ansible_sudo_pass: "{{ ros_adm_pass }}"
   tasks:
+    # Create a directory for local development. We check out packages here.
+    # This task is equivalent to "mkdir -p  /home/ros/catkin_ws/src && chown -R ros:ros /home/ros/catkin_ws"
     - name: Create catkin_ws if it doesn't yet exist
       file:
         path: /home/ros/catkin_ws/src
@@ -15,9 +20,17 @@
         owner: ros
         group: ros
         mode: '0755'
+
+    # Install the list of packages from the "apt" key of the json file.
+    # This task is equivalent to "sudo apt install <packages from json file>"
     - name: Install packages from deps.json
       apt:
         pkg: "{{ deps.apt }}"
+
+    # Check out all repos from the "git" key of the json file.
+    # This task is run as "ros". This part may hang silently if the repos aren't populated with anything
+    #
+    # This task is equivalent to "git clone <repo>" for each item in the json file
     - name: Install git repos from deps.json
       git:
         repo: "https://github.com/CapstoneThrone/{{ item }}.git"
@@ -26,10 +39,12 @@
       loop: "{{ deps.git }}"
       become: true
       become_user: ros
+
+    # Build all the checked out repos. This is run as "ros"
+    # This task is equivalent to "cd /home/ros/catkin_ws && catkin_make"
     - name: Build git repos
       command: catkin_make
       become: yes
       become_user: ros
       args:
         chdir: /home/ros/catkin_ws
-

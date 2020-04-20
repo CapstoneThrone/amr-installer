@@ -1,4 +1,0 @@
-[unprepared]
-<replace with pi's ip> ansible_user=ubuntu ansible_connection=paramiko
-[amr]
-169.254.13.13

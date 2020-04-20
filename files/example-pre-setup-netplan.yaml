@@ -1,14 +1,14 @@
 network:
     ethernets:
         eth0:
-            dhcp4:true
-            link-local:[ipv4,ipv6]
-            optional:true
+            dhcp4: true
+            link-local: [ipv4,ipv6]
+            optional: true
     wifis:
         wlan0:
             access-points:
-                abcd:
-                    password:"ahahahah"
-            dhcp4:true
-            optional:true
-    version:2
+                <wireless ssid>:
+                    password: "<wireless-password>"
+            dhcp4: true
+            optional: true
+    version: 2
