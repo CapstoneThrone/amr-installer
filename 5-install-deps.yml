@@ -48,3 +48,12 @@
       become_user: ros
       args:
         chdir: /home/ros/catkin_ws
+
+    # Install all the pip requirements as "ros"
+    # This task is equivalent to "pip install --user <list of all packages from deps.json>"
+    - name: Install pip requirements
+      pip:
+        name: "{{ deps.pip | join(' ') }}"
+        extra_args: --user
+      become: yes
+      become_user

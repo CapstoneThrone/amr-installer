@@ -1,22 +1,25 @@
 {
-	"apt": [
-		"build-essential",
-		"procinfo",
-		"python-wstool",
-		"python-rosinstall",
-		"python-rosinstall-generator",
-		"ros-melodic-desktop-full",
-		"ros-melodic-rosserial",
-		"ros-melodic-rosserial-arduino",
-		"ros-melodic-hector-slam",
-		"ros-melodic-rplidar-ros",
-		"ros-melodic-gmapping",
-		"ros-melodic-joy",
-		"ros-melodic-teleop-twist-joy"
-	],
-	"git": [
-		"Top-Level-Control",
-		"amr-mapping",
-		"amr-lcd-control"
-	]
+    "apt": [
+        "build-essential",
+        "procinfo",
+        "python-wstool",
+        "python-rosinstall",
+        "python-rosinstall-generator",
+        "ros-melodic-desktop-full",
+        "ros-melodic-rosserial",
+        "ros-melodic-rosserial-arduino",
+        "ros-melodic-hector-slam",
+        "ros-melodic-rplidar-ros",
+        "ros-melodic-gmapping",
+        "ros-melodic-joy",
+        "ros-melodic-teleop-twist-joy"
+    ],
+    "git": [
+        "Top-Level-Control",
+        "amr-mapping",
+        "amr-lcd-control"
+    ],
+    "pip": [
+        "lcdbackpack"
+    ]
 }

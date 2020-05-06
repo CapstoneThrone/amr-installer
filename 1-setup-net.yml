@@ -123,7 +123,7 @@
     #  sudo cp ./files/wired-ros-config-net.nmconnection /etc/NetworkManager/system-connections/wired-ros-config-net
     #  sudo chown root:root /etc/NetworkManager/system-connections/wired-ros-config-net
     #  sudo chmod 0600 /etc/NetworkManager/system-connections/wired-ros-config-net
-    - name: Install connections (wired with static ip [10.13.42.0])
+    - name: Install connections
       copy:
         src: "files/wired-ros-config-net.nmconnection"
         dest: "/etc/NetworkManager/system-connections/wired-ros-config-net"
